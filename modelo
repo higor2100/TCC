@@ -1020,6 +1020,9 @@
     "from pandas import read_csv\r\n",
     "from statsmodels.tsa.arima_model import ARIMA\r\n",
     "from sklearn.metrics import mean_squared_error\r\n",
+    "import time\r\n",
+    "\r\n",
+    "inicio = time.time()\r\n",
     "\r\n",
     "# evaluate an ARIMA model for a given order (p,d,q)\r\n",
     "def evaluate_arima_model(X, arima_order):\r\n",
@@ -1064,7 +1067,9 @@
     "d_values = range(0, 1)\r\n",
     "q_values = range(0, 1)\r\n",
     "warnings.filterwarnings(\"ignore\")\r\n",
-    "evaluate_models(series.values, p_values, d_values, q_values)"
+    "evaluate_models(series.values, p_values, d_values, q_values)\r\n",
+    "fim = time.time()\r\n",
+    "print(fim - inicio)"
    ],
    "outputs": [
     {

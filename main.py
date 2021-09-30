@@ -5,7 +5,7 @@ path = "./Jupyter/Arquivo CSV/"
 files = os.listdir(path)
 def jupyterFile(f):    
     abrir = open("modelo")
-    if f.find("In"):
+    if f.find("In")!=-1:
         abrirLeitura = abrir.read().replace("download","upload").replace("REPORLOCAL","./Arquivo CSV/"+f)
     else:
         abrirLeitura = abrir.read().replace("REPORLOCAL","./Arquivo CSV/"+f)
