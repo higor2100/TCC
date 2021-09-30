@@ -1,3 +1,0 @@
-predicted=1333.470; sterr=24.614; interval=(868.409, 1893.271)
-predicted=1312.646; sterr=33.556; interval=(764.665, 2000.703)
-predicted=1292.962; sterr=41.381; interval=(686.059, 2081.121)
