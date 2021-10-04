@@ -1,6 +1,6 @@
 import os
 
-execfile('manipulacao_arquivos.py')
+exec(compile(open('manipulacao_arquivos.py', "rb").read(), 'manipulacao_arquivos.py', 'exec'), globals(), locals())
 path = "./Jupyter/Arquivo CSV/"
 files = os.listdir(path)
 def jupyterFile(f):    
