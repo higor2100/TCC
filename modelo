@@ -418,7 +418,7 @@
     "months = concat([DataFrame(x[1].values) for x in y], axis=1)\r\n",
     "months = DataFrame(months)\r\n",
     "# This number (13) could be represent the quantity of months.\r\n",
-    "months.columns = range(14)\r\n",
+    "#months.columns = range(14)\r\n",
     "months.boxplot(figsize=(16,10))\r\n",
     "plt.title(\"Download\")\r\n",
     "plt.show()"

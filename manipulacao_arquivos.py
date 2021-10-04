@@ -1,7 +1,7 @@
 import pandas as pd
 import os
-
-path = "./Arquivo HTML/"
+dir_path = os.path.dirname(os.path.realpath(__file__))
+path = dir_path+"\Arquivo HTML\\"
 files = os.listdir(path)
 
 def manipular(file):
@@ -34,7 +34,7 @@ def manipular(file):
         tabelaUpload['download'] = tabelaUpload['download'].astype(object).astype(int)
     
     #6 - Salvamento do arquivo em formato CSV
-    tabelaUpload[::-1].to_csv(r"./Jupyter/Arquivo CSV/"+nomeArquivo.replace(":"," -")+".csv",index = False, header=True)
+    tabelaUpload[::-1].to_csv(((dir_path)+"\Jupyter\Arquivo CSV\\")+nomeArquivo.replace(":"," -")+".csv",index = False, header=True)
 
 for f in files:
     manipular(f)
