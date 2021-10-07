@@ -16,10 +16,7 @@ def manipular(file):
     conv = (tabelaPreConversao.replace("<br>","\n")).replace(" ", ";")
 
     #3 - Criação da Base de dados
-    if nomeArquivo.find("In")!=-1:
-        tabelaUpload = pd.DataFrame([x.split(';') for x in conv.split('\n')],columns=['Data','Hora','NDeSerie','upload'])
-    else:
-        tabelaUpload = pd.DataFrame([x.split(';') for x in conv.split('\n')],columns=['Data','Hora','NDeSerie','download'])
+    tabelaUpload = pd.DataFrame([x.split(';') for x in conv.split('\n')],columns=['Data','Hora','NDeSerie','bytes'])
     tabelaUpload.insert(0,"time",tabelaUpload['Data'] + " " + tabelaUpload['Hora'])
 
     #4 - Limpeza dos dados desnecessarios
@@ -28,10 +25,7 @@ def manipular(file):
 
     #5 - Formatação dos dados 
     tabelaUpload['time'] = pd.to_datetime(tabelaUpload['time'], format='%d-%m-%Y %H:%M:%S').dt.strftime('%Y-%m-%d %H:%M:%S')
-    if nomeArquivo.find("In")!=-1:
-        tabelaUpload['upload'] = tabelaUpload['upload'].astype(object).astype(int)
-    else:
-        tabelaUpload['download'] = tabelaUpload['download'].astype(object).astype(int)
+    tabelaUpload['bytes'] = tabelaUpload['bytes'].astype(object).astype(int)
     
     #6 - Salvamento do arquivo em formato CSV
     tabelaUpload[::-1].to_csv(((dir_path)+"\Jupyter\Arquivo CSV\\")+nomeArquivo.replace(":"," -")+".csv",index = False, header=True)

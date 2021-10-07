@@ -73,7 +73,7 @@
   {
    "cell_type": "markdown",
    "source": [
-    "Vamos ler o arquivo `download.csv`, que contém os valores de downloads feitos via canal de internet do Hospital das Clínicas no período entre 9:00 de 20 de setembro de 2019 e 21:00 de 3 de setembro de 2020. "
+    "Vamos ler o arquivo que contém os valores de download feitos via canal de internet do Hospital das Clínicas, realizados em um mes. "
    ],
    "metadata": {}
   },
@@ -454,7 +454,7 @@
    "source": [
     "***\n",
     "As séries também podem ser __contínuas__, como é o caso dos resultados de eletrocardiograma ou de encefalograma.\n",
-    "![traces-ECG.jpg](attachment:traces-ECG.jpg)\n",
+    "![./Data/traces-ECG.jpg](attachment:./Data/traces-ECG.jpg)\n",
     "`https://www.dispomed.com/electrocardiogram-ecg/`\n"
    ],
    "metadata": {},
@@ -1069,7 +1069,7 @@
     "warnings.filterwarnings(\"ignore\")\r\n",
     "evaluate_models(series.values, p_values, d_values, q_values)\r\n",
     "fim = time.time()\r\n",
-    "print(fim - inicio)"
+    "print(str(round((inicio-fim)/60,0))+' mins')"
    ],
    "outputs": [
     {
@@ -1219,7 +1219,7 @@
   {
    "cell_type": "markdown",
    "source": [
-    "Após descobrir quais os parâmetros para o modelo ARIMA, o próximo passo é compilar o modelo, isto é, vamos colocá-lo em um formato binário que nos permita fazer predições. Para tanto, vamos usar o código abaixo. Os resultados `download.pkl` e `download.npy` devem ser salvos para serem utilizados nas futuras predições."
+    "Após descobrir quais os parâmetros para o modelo ARIMA, o próximo passo é compilar o modelo, isto é, vamos colocá-lo em um formato binário que nos permita fazer predições. Para tanto, vamos usar o código abaixo. Os resultados `arquivoPkl.pkl` e `arquivoNpy.npy` devem ser salvos para serem utilizados nas futuras predições."
    ],
    "metadata": {}
   },
@@ -1243,8 +1243,8 @@
     "# filename of time series for download\r\n",
     "downname = 'REPORLOCAL'\r\n",
     "# filename for ARIMA saved model and parameters\r\n",
-    "pklname = './Data/download.pkl'\r\n",
-    "npyname = './Data/download.npy'\r\n",
+    "pklname = './Data/arquivoPkl.pkl'\r\n",
+    "npyname = './Data/arquivoNpy.npy'\r\n",
     "# read download csv file\r\n",
     "s = read_csv(downname,header=0,index_col=0, parse_dates=True, squeeze=True, sep=',')\r\n",
     "# prepare data\r\n",
@@ -1280,7 +1280,7 @@
     "\n",
     "2. Estamos utilizando um recurso denominado `boxcox()`; esta técnica de estatística está explicada na seção seguinte;\n",
     "\n",
-    "3. O arquivo `download.pkl` contém o modelo ARIMA baseado nos dados fornecidos e permitirá desenvolver as __previsões__ (forecasting) ou quais serão os futuros valores da série."
+    "3. O arquivo `arquivoPkl.pkl` contém o modelo ARIMA baseado nos dados fornecidos e permitirá desenvolver as __previsões__ (forecasting) ou quais serão os futuros valores da série."
    ],
    "metadata": {}
   },
@@ -1367,7 +1367,7 @@
   {
    "cell_type": "markdown",
    "source": [
-    "A partir do script abaixo e com o modelo salvo `download.pkl`, vamos calcular os 3 próximos valores. __Não podemos nos esquecer de fazer a transformação inversa de Box-Cox__. Utilizamos a transformação para facilitar a montagem do modelo, mas ao fazer um prognóstico, é preciso retornar à situação antes da transformação. É por isto que existe um arquivo gravado denominado `download.npy`, que contém, entre outros valores, o de ${\\lambda}$. "
+    "A partir do script abaixo e com o modelo salvo `arquivoPkl.pkl`, vamos calcular os 3 próximos valores. __Não podemos nos esquecer de fazer a transformação inversa de Box-Cox__. Utilizamos a transformação para facilitar a montagem do modelo, mas ao fazer um prognóstico, é preciso retornar à situação antes da transformação. É por isto que existe um arquivo gravado denominado `arquivoNpy.npy`, que contém, entre outros valores, o de ${\\lambda}$. "
    ],
    "metadata": {}
   },
@@ -1392,9 +1392,9 @@
     "        return exp(value)\r\n",
     "    return exp(log(lam * value + 1) / lam)\r\n",
     "    #load model\r\n",
-    "pklname = './Data/download.pkl'\r\n",
-    "npyname = './Data/download.npy'\r\n",
-    "txtresultname = './Data/forecast-download.txt'\r\n",
+    "pklname = './Data/arquivoPkl.pkl'\r\n",
+    "npyname = './Data/arquivoNpy.npy'\r\n",
+    "txtresultname = './Data/forecast-arquivoTxt.txt'\r\n",
     "model_fit = ARIMAResults.load(pklname)\r\n",
     "lam = numpy.load(npyname)\r\n",
     "# Prediction\r\n",
@@ -1441,7 +1441,7 @@
   {
    "cell_type": "markdown",
    "source": [
-    "Os valores estão guardados no arquivo `forecast-download.txt`."
+    "Os valores estão guardados no arquivo `forecast-arquivoTxt.txt`."
    ],
    "metadata": {}
   },
