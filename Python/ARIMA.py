@@ -1,41 +1,43 @@
-# evaluate an ARIMA model using a walk-forward validation
 from pandas import read_csv
 from matplotlib import pyplot
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_squared_error
 from math import sqrt
 import time
-import os
 
 inicio = time.time()
 
+#criação do dataframe
 df = read_csv("C:\\Users\\higor\\Documents\\GitHub\\TCC\\Jupyter\\Arquivo CSV\\PACS01 - Trafego In VDX PACS01_To_CORE02.csv", sep=",")
-#parse_dates=True, squeeze=True, date_parser=parser)
-# split into train and test sets
+
+#leitura e remoção de dados do arquivo csv
 X = df['bytes']
 X.drop(X.tail(5).index,inplace=True)
-size = int(len(X) * 0.5)
-train, test = X[0:size], X[size:len(X)]
-history = [x for x in train]
-predictions = list()
-# walk-forward validation
-for t in test: 
-    model = ARIMA(history, order=(1,0,0))
-    model_fit = model.fit()
-    output = model_fit.forecast()
-    yhat = int(output[0])
-    predictions.append(yhat)
+
+tamanho = int(len(X) * 0.5)
+treino, teste = X[0:tamanho], X[tamanho:len(X)]
+historico = [x for x in treino]
+predicoes = list()
+#criação do modelo
+for t in teste: 
+    modelo = ARIMA(historico, order=(1,0,0))
+    modelo_fit = modelo.fit()
+    saida = modelo_fit.forecast()
+    yhat = int(saida[0])
+    predicoes.append(yhat)
     obs = int(t)
-    history.append(obs)
-# evaluate forecasts
-rmse = sqrt(mean_squared_error(test, predictions))
+    historico.append(obs)
+    
+# Teste RMSE com as predições
+rmse = sqrt(mean_squared_error(teste, predicoes))
 print('Teste do RMSE: %.3f' % rmse)
-# plot forecasts against actual outcomes
-pyplot.plot(test)
-pyplot.plot(predictions, color='red')
+
+# plot das predições/dados reais
+pyplot.plot(teste)
+pyplot.plot(predicoes, color='red')
 pyplot.show()
 fim = time.time()
+
 f = open("info.txt", "a")
-f.write(str(test) +"\r\n"+ str(predictions) + "\r\n" + "Tempo de execução:" + str(round((inicio-fim)/60,0))+' mins')
+f.write(str(teste) +"\r\n"+ str(predicoes) + "\r\n" + "Tempo de execução:" + str(round((inicio-fim)/60,0))+' mins')
 f.close()
-#os.system("shutdown /s /t 1")
