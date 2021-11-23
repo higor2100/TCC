@@ -430,49 +430,59 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "from statsmodels.tsa.stattools import adfuller\n",
-    "import pandas as pd\n",
-    "import datetime\n",
+    "import warnings\n",
+    "from math import sqrt\n",
+    "from pandas import read_csv\n",
+    "from statsmodels.tsa.arima_model import ARIMA\n",
+    "from sklearn.metrics import mean_squared_error\n",
     "\n",
-    "class Estacionariedade:\n",
-    "    def __init__(self, t=.05):\n",
-    "        self.testeTAU = t\n",
-    "        self.pValue = None\n",
-    "        self.estacionaria = None\n",
+    "# evaluate an ARIMA model for a given order (p,d,q)\n",
+    "def evaluate_arima_model(X, arima_order):\n",
+    "    # prepare training dataset\n",
+    "    train_size = int(len(X) * 0.9999)\n",
+    "    train, test = X[0:train_size], X[train_size:]\n",
+    "    history = [x for x in train]\n",
+    "    # make predictions\n",
+    "    predictions = list()\n",
+    "    for t in range(len(test)):\n",
+    "        model = ARIMA(history, order=arima_order)\n",
+    "        model_fit = model.fit(disp=0)\n",
+    "        yhat = int(model_fit.forecast()[0][0])\n",
+    "        predictions.append(yhat)\n",
+    "        history.append(test[t])\n",
+    "    # calculate out of sample error\n",
+    "    rmse = sqrt(mean_squared_error(test, predictions))\n",
+    "    return rmse, predictions\n",
     "\n",
-    "    def TesteDF(self, seriestemporais, printResults = True):\n",
-    "        #Teste de Dickey-Fuller:\n",
-    "        testeDF = adfuller(seriestemporais, autolag='AIC')\n",
-    "        \n",
-    "        self.pValue = testeDF[1]\n",
-    "        \n",
-    "        if (self.pValue<self.testeTAU): #rejeita H0\n",
-    "            self.estacionaria = \"Sim\"\n",
-    "        else: #aceita H0\n",
-    "            self.estacionaria = \"Não\"\n",
-    "        \n",
-    "        if printResults:\n",
-    "            #print(\"teste\", testeDF)\n",
-    "            dfResultados = pd.Series(testeDF[0:4], index=['Teste de Dickey-Fuller','Valor de P','Atrasos','Amostra'])\n",
-    "            #Add Critical Values\n",
-    "            for key,value in testeDF[4].items():\n",
-    "                dfResultados['Valor crítico (%s)'%key] = value\n",
-    "            print('Resultados do Teste de Dickey-Fuller:')\n",
-    "            print(dfResultados)\n",
+    "# evaluate combinations of p, d and q values for an ARIMA model\n",
+    "def evaluate_models(dataset, p_values, d_values, q_values):\n",
+    "    dataset = dataset.astype('float32')\n",
+    "    best_score, best_cfg = float(\"inf\"), None\n",
+    "    for p in p_values:\n",
+    "        for d in d_values:\n",
+    "            for q in q_values:\n",
+    "                order = (p,d,q)\n",
+    "                try:\n",
+    "                    rmse, prediction = evaluate_arima_model(dataset, order)\n",
+    "                    if rmse < best_score:\n",
+    "                        best_score, best_cfg = rmse, order\n",
+    "                        best_order = order\n",
+    "                    print('\\n ARIMA%s RMSE=%.3f' % (order,rmse))\n",
+    "                except:\n",
+    "                    continue\n",
+    "    print('Best ARIMA %s RMSE = %.3f' % (best_cfg, best_score))\n",
+    "    return best_order, prediction\n",
     "\n",
-    "\n",
-    "def conversor(strdate):\n",
-    "    objdate = datetime.datetime.strptime(strdate,'%Y-%m-%d %H:%M:%S')\n",
-    "    return objdate\n",
-    "PACS= pd.read_csv('REPORLOCAL', sep=\",\")\n",
-    "# 'time' conversão para datetime\n",
-    "PACS['time'] = PACS['time'].map(lambda value: conversor(value))\n",
-    "# 'time' vira um index\n",
-    "PACS= PACS.set_index('time')\n",
-    "\n",
-    "Teste = Estacionariedade()\n",
-    "Teste.TesteDF(PACS, printResults = True)\n",
-    "print(\"É uma série estacionária?\", Teste.estacionaria)"
+    "# evaluate parameters\n",
+    "p_values = [0, 1]\n",
+    "d_values = range(0, 1)\n",
+    "q_values = range(0, 1)\n",
+    "warnings.filterwarnings(\"ignore\")\n",
+    "bits = read_csv('./Arquivo CSV/PACS01 - Trafego In VDX PACS01_To_CORE02.csv',sep=',', index_col=0, parse_dates=True, squeeze=True)\n",
+    "# evaluate parameters\n",
+    "warnings.filterwarnings(\"ignore\")\n",
+    "best_order, prediction = evaluate_models(bits.values, p_values, d_values, q_values)\n",
+    "prediction"
    ]
   },
   {
@@ -600,26 +610,8 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Preparação dos dados ##"
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "***\n",
-    "Tamanho para o treinamento da IA"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {
-    "id": "lUZgLh2dBeP8"
-   },
-   "outputs": [],
-   "source": [
-    "tamanho = int(download.size/2)"
+    "## Preparação dos dados ##\n",
+    "***"
    ]
   },
   {
@@ -627,24 +619,6 @@
    "metadata": {},
    "source": [
     "Acima foi preparado uma base de dados para que seja possivel treinar a IA com uma parcela dos dados."
-   ]
-  },
-  {
-   "cell_type": "markdown",
-   "metadata": {},
-   "source": [
-    "Vamos considerar agora os seguintes valores para $(p, d, q)$ e rodar as predições:"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "p_values = [0,1,2,3,4,5]\n",
-    "d_values = range(0,5)\n",
-    "q_values = range(0,5)"
    ]
   },
   {
@@ -677,14 +651,15 @@
     "# evaluate an ARIMA model for a given order (p,d,q)\n",
     "def evaluate_arima_model(X, arima_order):\n",
     "    # prepare training dataset\n",
-    "    train, test = X[0:tamanho], X[tamanho:]\n",
+    "    train_size = int(len(X) * 0.9999)\n",
+    "    train, test = X[0:train_size], X[train_size:]\n",
     "    history = [x for x in train]\n",
     "    # make predictions\n",
     "    predictions = list()\n",
     "    for t in range(len(test)):\n",
     "        model = ARIMA(history, order=arima_order)\n",
     "        model_fit = model.fit(disp=0)\n",
-    "        yhat = model_fit.forecast()[0]\n",
+    "        yhat = int(model_fit.forecast()[0][0])\n",
     "        predictions.append(yhat)\n",
     "        history.append(test[t])\n",
     "    # calculate out of sample error\n",
@@ -695,32 +670,35 @@
     "def evaluate_models(dataset, p_values, d_values, q_values):\n",
     "    dataset = dataset.astype('float32')\n",
     "    best_score, best_cfg = float(\"inf\"), None\n",
-    "    stop = False\n",
     "    for p in p_values:\n",
-    "        if stop:\n",
-    "            break\n",
     "        for d in d_values:\n",
-    "            if stop:\n",
-    "                break\n",
     "            for q in q_values:\n",
-    "                if stop:\n",
-    "                    break\n",
     "                order = (p,d,q)\n",
     "                try:\n",
-    "                    rmse, predictions = evaluate_arima_model(dataset, order)\n",
+    "                    rmse, prediction = evaluate_arima_model(dataset, order)\n",
     "                    if rmse < best_score:\n",
     "                        best_score, best_cfg = rmse, order\n",
     "                        best_order = order\n",
-    "                        stop = True\n",
-    "                    #print('\\n ARIMA%s RMSE=%.3f' % (order,rmse))\n",
+    "                    print('\\n ARIMA%s RMSE=%.3f' % (order,rmse))\n",
     "                except:\n",
     "                    continue\n",
     "    print('Best ARIMA %s RMSE = %.3f' % (best_cfg, best_score))\n",
-    "    return best_order, predictions\n",
-    "download = pd.read_csv('REPORLOCAL', sep=',')\n",
+    "    return best_order, prediction\n",
+    "\"\"\"\n",
+    "p_values = [0, 1]\n",
+    "d_values = range(0, 1)\n",
+    "q_values = range(0, 1)\n",
+    "\"\"\"\n",
+    "# evaluate parameters\n",
+    "p_values = [0, 1, 2, 3, 4, 5]\n",
+    "d_values = range(0, 5)\n",
+    "q_values = range(0, 5)\n",
+    "warnings.filterwarnings(\"ignore\")\n",
+    "PACS = read_csv('REPORLOCAL',sep=',', index_col=0, parse_dates=True, squeeze=True)\n",
     "# evaluate parameters\n",
     "warnings.filterwarnings(\"ignore\")\n",
-    "best_order, predictions = evaluate_models(download['bits'], p_values, d_values, q_values)"
+    "best_order, prediction = evaluate_models(PACS.values, p_values, d_values, q_values)\n",
+    "prediction"
    ]
   },
   {
@@ -761,7 +739,8 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "plt.plot(predictions,figsize=(100,50))"
+    "from matplotlib import pyplot\n",
+    "pyplot.plot(prediction)"
    ]
   }
  ],
