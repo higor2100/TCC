@@ -34,7 +34,7 @@ def conversor(strdate):
     return objdate
 
 #criação da serie
-serie = pd.read_csv("C:\\Users\\Josue\\tcc-final\\TCC\\Jupyter\\Arquivo CSV\\PACS01 - Trafego In VDX PACS01_To_CORE02.csv", sep=",")
+serie = pd.read_csv("C:\\Users\\higor\\Documents\\GitHub\\TCC\\Jupyter\\Arquivo CSV\\PACS01 - Trafego In VDX PACS01_To_CORE02.csv", sep=",")
 
 # 'time' conversão para datetime
 serie['time'] = serie['time'].map(lambda value: conversor(value))

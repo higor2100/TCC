@@ -16,7 +16,7 @@ def manipular(file):
     conv = (tabelaPreConversao.replace("<br>","\n")).replace(" ", ";")
 
     #3 - Criação da Base de dados
-    tabelaUpload = pd.DataFrame([x.split(';') for x in conv.split('\n')],columns=['Data','Hora','NDeSerie','bytes'])
+    tabelaUpload = pd.DataFrame([x.split(';') for x in conv.split('\n')],columns=['Data','Hora','NDeSerie','bits'])
     tabelaUpload.insert(0,"time",tabelaUpload['Data'] + " " + tabelaUpload['Hora'])
 
     #4 - Limpeza dos dados desnecessarios
@@ -25,7 +25,7 @@ def manipular(file):
 
     #5 - Formatação dos dados 
     tabelaUpload['time'] = pd.to_datetime(tabelaUpload['time'], format='%d-%m-%Y %H:%M:%S').dt.strftime('%Y-%m-%d %H:%M:%S')
-    tabelaUpload['bytes'] = tabelaUpload['bytes'].astype(object).astype(int)
+    tabelaUpload['bits'] = tabelaUpload['bits'].astype(object).astype(int)
     
     #6 - Salvamento do arquivo em formato CSV
     tabelaUpload[::-1].to_csv(((dir_path)+"\Jupyter\Arquivo CSV\\")+nomeArquivo.replace(":"," -")+".csv",index = False, header=True)
